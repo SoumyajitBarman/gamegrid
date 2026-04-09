@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Details</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <h1 id="title"></h1>
+
+  <img id="image" width="400"/>
+
+  <p id="rating"></p>
+  <p id="released"></p>
+  <p id="description"></p>
+
+<h3>💻 Requirements</h3>
+<p id="requirements"></p>
+
+
+
+  <br>
+  <button onclick="goBack()">⬅ Back</button>
+
+  <script>
+    const API_KEY = "29e472fbed2b4c539a42378c6d12f75e";
+    const USE_BACKEND = window.location.protocol === 'http:' && window.location.port === '3000';
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    async function loadGame() {
+      // Use backend if available, otherwise direct API call
+      const url = USE_BACKEND
+        ? `/api/games/${id}`
+        : `https://api.rawg.io/api/games/${id}?key=${API_KEY}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      document.getElementById("title").innerText = data.name;
+      document.getElementById("image").src = data.background_image;
+      document.getElementById("rating").innerText = "⭐ Rating: " + data.rating;
+      document.getElementById("released").innerText = "📅 Released: " + data.released;
+      const rawDesc = data.description_raw || "";
+
+// Remove HTML + cut Spanish part
+let cleanDesc = rawDesc
+  .replace(/<[^>]*>/g, "")   // remove HTML tags
+  .split("Español")[0] 
+  .split("Español")[0]
+.split("Русский")[0]
+.split("Français")[0]      // remove Spanish part
+  .trim();
+
+document.getElementById("description").innerText =
+  cleanDesc || "No description available";
+    document.getElementById("requirements").innerText =
+  data.platforms
+    ? data.platforms.map(p => p.platform.name).join(", ")
+    : "Not available";
+    if (data.name.includes("Grand Theft Auto V")) {
+  
+}
+    
+    }
+
+    function goBack() {
+      window.history.back();
+    }
+
+    loadGame();
+  </script>
+
+</body>
+</html>
